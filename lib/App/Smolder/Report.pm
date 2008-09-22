@@ -7,7 +7,7 @@ use LWP::UserAgent;
 use Getopt::Long;
 use Carp::Clan qw(App::Smolder::Report);
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 
 ###################
@@ -184,13 +184,14 @@ sub _merge_cfg_hash {
 sub process_args {
   my ($self) = @_;
   
-  my ($username, $password, $server, $project_id, $dry_run, $delete);
+  my ($username, $password, $server, $project_id, $dry_run, $delete, $quiet);
   my $ok = GetOptions(
     "username=s"   => \$username,
     "password=s"   => \$password,
     "server=s"     => \$server,
     "project-id=i" => \$project_id,
     "dry-run|n"    => \$dry_run,
+    "quiet"        => \$quiet,
     "delete"       => \$delete,
   );
   exit(2) unless $ok;
@@ -201,7 +202,8 @@ sub process_args {
   $self->{password} = $password     if defined $password;
   $self->{server} = $server         if defined $server;
   $self->{project_id} = $project_id if defined $project_id;
-  $self->{dry_run} = $dry_run       if defined $project_id;
+  $self->{dry_run} = $dry_run       if defined $dry_run;
+  $self->{quiet} = $quiet           if defined $quiet;
   $self->{delete} = $delete         if defined $delete;
   
   return;
@@ -235,6 +237,7 @@ sub _fatal {
 sub _log {
   my ($self, $mesg) = @_;
   return if $self->run_as_api;
+  return if $self->quiet;
 
   print "$mesg\n";
 
@@ -264,6 +267,7 @@ sub new {
 }
 
 sub dry_run    { return $_[0]{dry_run}    }
+sub quiet      { return $_[0]{quiet}      }
 sub username   { return $_[0]{username}   }
 sub password   { return $_[0]{password}   }
 sub delete     { return $_[0]{delete}     }
@@ -281,7 +285,7 @@ App::Smolder::Report - Report test runs to a smoke server
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
